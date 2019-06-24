@@ -1,0 +1,28 @@
+{
+  "name": "zev-color-picker",
+  "version": "1.0.0",
+  "description": "HTML 5 - Photoshop style color picker",
+  "main": "dist/zevColorPicker.js",
+  "scripts": {
+    "start": "rollup -c rollup.config.js --watch",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/phillyDesignr/zev-color-picker.git"
+  },
+  "keywords": [
+    "html5",
+    "color",
+    "picker"
+  ],
+  "author": "Jeremy Zevin",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/phillyDesignr/zev-color-picker/issues"
+  },
+  "homepage": "https://github.com/phillyDesignr/zev-color-picker#readme",
+  "devDependencies": {
+    "rollup": "^1.16.2"
+  }
+}
