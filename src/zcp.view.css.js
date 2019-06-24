@@ -1,52 +1,4 @@
-(function (global, factory) {
-  typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
-  typeof define === 'function' && define.amd ? define(factory) :
-  (global = global || self, global.ZevColorPicker = factory());
-}(this, function () { 'use strict';
-
-  const html = `
-<div class="zev-color-picker">
-  <header class="header">
-    <div class="title">Zev Color Picker</div>  
-  </header>
-  <div class="pickers">
-      <div class="left">
-          <canvas class="main" width="256" height="256"></canvas>
-      </div>
-      <div class="right">
-          <canvas class="range" width="40" height="256"></canvas>
-      </div>
-  </div>
-  <div class="properties">
-    <div class="chips">
-      <div class="chip-title">current</div>
-      <div class="chip chip-current"></div>
-      <div class="chip chip-new"></div>
-      <div class="chip-title">new</div>
-    </div>
-    <div class="inputs">
-      <div class="group">
-        <label for="hue">H:</label>
-        <input type="text" name="hue">
-      </div>
-      <div class="group">
-        <label for="saturation">S:</label>
-        <input type="text" name="saturation">
-      </div>
-      <div class="group">
-        <label for="brightness">B:</label>
-        <input type="text" name="brightness">
-      </div>
-    </div>
-  </div>
-  <div class="buttons">
-    <button class="btn">OK</button>
-    <button class="btn">Cancel</button>
-  </div>
-</div>
-`;
-
-  const css = `
+const css = `
 
 .zev-color-picker {
     background-color: #333;
@@ -152,25 +104,6 @@
    
 `;
 
-  const ViewCtrl = (function (html) {
-      function ViewCtrl() {
-          this.el = document.querySelector('[data-zev-color-picker]');
-          this.html = html;
-          this.el.innerHTML = this.html;
-          this.cssEl = document.createElement('style');
-          this.cssEl.innerHTML = css;
-          this.el.insertAdjacentElement('beforebegin', this.cssEl);
-      }
-      return ViewCtrl;
-  })(html);
-
-  const ZevColorPicker = (function (view) {
-      function ZevColorPicker() {
-          this.view = view;
-      }
-      return ZevColorPicker;
-  })(new ViewCtrl());
-
-  return ZevColorPicker;
-
-}));
+export {
+    css
+}
