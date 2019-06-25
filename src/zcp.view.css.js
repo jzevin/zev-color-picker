@@ -5,6 +5,7 @@ const css = `
     display: flex;
     flex-wrap: wrap;
     color: white;
+    user-select: none;
     font-family: sans-serif;
     max-width: 600px;
     min-width: 330px;
@@ -39,7 +40,7 @@ const css = `
     align-items: center;
   }
   .zev-color-picker .pickers .left canvas, .zev-color-picker .pickers .right canvas {
-    background-color: #222;
+    background-color: transparent;
   }
   .zev-color-picker .pickers .right {
     margin-left: 0.25em;
@@ -59,7 +60,7 @@ const css = `
     text-align: center;
   }
   .zev-color-picker .properties .chips .chip {
-    width: 60px;
+    width: 80px;
     height: 45px;
     background-color: #222;
     border-radius: 4px;

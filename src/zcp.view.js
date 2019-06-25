@@ -1,6 +1,7 @@
 import { html } from './zcp.view.html';
 import { css } from './zcp.view.css';
 import { PickerMainCtrl } from './zcp.view.picker.main';
+import { PickerRangeCtrl } from './zcp.view.picker.range';
 
 const ViewCtrl = (function () {
     function mount() {
@@ -36,6 +37,7 @@ const ViewCtrl = (function () {
         mount.apply(this);
         setDomRefs.apply(this);
         const pMain = new PickerMainCtrl(this.dom.pickers.main, state);
+        const pRange = new PickerRangeCtrl(this.dom.pickers.range, state);
     }
     return ViewCtrl;
 })();

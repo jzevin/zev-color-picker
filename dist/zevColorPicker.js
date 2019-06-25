@@ -53,6 +53,7 @@
     display: flex;
     flex-wrap: wrap;
     color: white;
+    user-select: none;
     font-family: sans-serif;
     max-width: 600px;
     min-width: 330px;
@@ -87,7 +88,7 @@
     align-items: center;
   }
   .zev-color-picker .pickers .left canvas, .zev-color-picker .pickers .right canvas {
-    background-color: #222;
+    background-color: transparent;
   }
   .zev-color-picker .pickers .right {
     margin-left: 0.25em;
@@ -107,7 +108,7 @@
     text-align: center;
   }
   .zev-color-picker .properties .chips .chip {
-    width: 60px;
+    width: 80px;
     height: 45px;
     background-color: #222;
     border-radius: 4px;
@@ -152,6 +153,30 @@
    
 `;
 
+  function rgbToHsl(r, g, b) {
+      r /= 255, g /= 255, b /= 255;
+
+      var max = Math.max(r, g, b), min = Math.min(r, g, b);
+      var h, s, l = (max + min) / 2;
+
+      if (max == min) {
+          h = s = 0; // achromatic
+      } else {
+          var d = max - min;
+          s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+
+          switch (max) {
+              case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+              case g: h = (b - r) / d + 2; break;
+              case b: h = (r - g) / d + 4; break;
+          }
+
+          h /= 6;
+      }
+
+      return [Math.round(h * 360), s * 100, l * 100];
+  }
+
   const PickerMainCtrl = (function () {
       const colorLoc = {
           x: 0,
@@ -160,7 +185,7 @@
       function renderPickerMarker(x, y) {
           this.ctx.save();
           this.ctx.beginPath();
-          this.ctx.strokeStyle = y > this.h/2 ? 'white' : 'black';
+          this.ctx.strokeStyle = y > this.h / 2 ? 'white' : 'black';
           this.ctx.lineWidth = 1.25;
           this.ctx.arc(x, y, 10, 0, 2 * Math.PI);
           this.ctx.stroke();
@@ -175,7 +200,7 @@
           colorLoc.y = 0;
           this.ctx.canvas.addEventListener('click', this.onClick.bind(this));
           this.state.subscribe(data => {
-              this.render(data.currentColor);
+              this.render(`hsl(${data.hsl.h}, 100%, 50%)`);
           });
       }
       PickerMainCtrl.prototype.render = function (color) {
@@ -199,10 +224,72 @@
       PickerMainCtrl.prototype.onClick = function (e) {
           colorLoc.x = e.offsetX;
           colorLoc.y = e.offsetY;
-          let [r,g,b,a] = [...this.ctx.getImageData(colorLoc.x, colorLoc.y, 1, 1).data];
-          this.state.set('newColor', `rgb(${r},${g},${b})`);
+          let [r, g, b] = [...this.ctx.getImageData(colorLoc.x, colorLoc.y, 1, 1).data];
+          let [h, s, l] = rgbToHsl(r, g, b);
+          this.state.set('hsl', { h, s, l });
       };
       return PickerMainCtrl;
+  })();
+
+  const PickerRangeCtrl = (function () {
+      let appState, ctx, w, h, grad;
+      const padding = 10;
+      const colorLoc = {
+          x: 0,
+          y: 0
+      };
+      function render() {
+          ctx.clearRect(0,0,w,h);
+          ctx.save();
+          ctx.fillStyle = grad;
+          ctx.fillRect(padding, 0, w-padding*2, h);
+          ctx.restore();
+          renderMarker();
+      }
+      function renderMarker() {
+          const size = 6;
+          ctx.save();
+          ctx.fillStyle = 'white';
+          ctx.strokeStyle = '#222';
+          ctx.lineWidth = 1.5;
+          ctx.beginPath();
+          ctx.moveTo(padding, colorLoc.y);
+          ctx.lineTo(0, colorLoc.y+size);
+          ctx.lineTo(0, colorLoc.y-size);
+          ctx.lineTo(padding, colorLoc.y);
+          ctx.fill();
+          ctx.stroke();
+          ctx.closePath();
+          ctx.beginPath();
+          ctx.moveTo(w-padding, colorLoc.y);
+          ctx.lineTo(w, colorLoc.y+size);
+          ctx.lineTo(w, colorLoc.y-size);
+          ctx.lineTo(w-padding, colorLoc.y);
+          ctx.fill();
+          ctx.stroke();
+          ctx.closePath();
+          ctx.restore();
+      }
+      function onClick(e) {
+          if(e.offsetX < padding || e.offsetX > w - (padding+1)) return;
+          colorLoc.x = e.offsetX;
+          colorLoc.y = e.offsetY;
+          let [r,g,b,a] = [...ctx.getImageData(colorLoc.x, colorLoc.y, 1, 1).data];
+          let [h, s, l] = rgbToHsl(r,g,b);
+          appState.setHSL('h', h);
+      }
+      function PickerRangeCtrl(canvas, state) {
+          ctx = canvas.getContext('2d');
+          w = canvas.width;
+          h = canvas.height;
+          appState = state;
+          grad = ctx.createLinearGradient(0, 0, 0, h);
+          for (let i = 0; i < 359; i++) {
+              grad.addColorStop(1 - (i * 0.002777777777777778), `hsl(${i}, 100%, 50%)`);
+          }        canvas.addEventListener('click', onClick);
+          appState.subscribe(data => render());
+      }
+      return PickerRangeCtrl;
   })();
 
   const ViewCtrl = (function () {
@@ -239,6 +326,7 @@
           mount.apply(this);
           setDomRefs.apply(this);
           const pMain = new PickerMainCtrl(this.dom.pickers.main, state);
+          const pRange = new PickerRangeCtrl(this.dom.pickers.range, state);
       }
       return ViewCtrl;
   })();
@@ -248,7 +336,11 @@
       function State() {
           this.data = {
               currentColor: 'purple',
-              newColor: 'purple'
+              hsl: {
+                  h: 0,
+                  s: 100,
+                  l: 50
+              }
           };
       }
       State.prototype.subscribe = function (cb) {
@@ -257,6 +349,10 @@
       };
       State.prototype.set = function (key, val) {
           this.data[key] = val;
+          this.next(this.data);
+      };
+      State.prototype.setHSL = function (key, val) {
+          this.data.hsl[key] = val;
           this.next(this.data);
       };
       State.prototype.next = function (val) {
@@ -270,8 +366,11 @@
           this.state = new ZcpState();
           this.view = new ViewCtrl(this.state);
           this.state.subscribe(data => {
-              console.log(data);
-              this.view.dom.chips.new.style.backgroundColor = data.newColor;
+              this.view.dom.chips.current.style.backgroundColor = data.currentColor;
+              this.view.dom.chips.new.style.backgroundColor = `hsl(${data.hsl.h}, ${data.hsl.s}%, ${data.hsl.l}%)`;
+              this.view.dom.inputs.hue.value = data.hsl.h;
+              this.view.dom.inputs.saturation.value = Math.round(data.hsl.s);
+              this.view.dom.inputs.lightness.value = Math.round(data.hsl.l);
           });
       }
       return ZevColorPicker;

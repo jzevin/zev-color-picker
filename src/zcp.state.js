@@ -3,7 +3,11 @@ const ZcpState = (function () {
     function State() {
         this.data = {
             currentColor: 'purple',
-            newColor: 'purple'
+            hsl: {
+                h: 0,
+                s: 100,
+                l: 50
+            }
         }
     }
     State.prototype.subscribe = function (cb) {
@@ -12,6 +16,10 @@ const ZcpState = (function () {
     }
     State.prototype.set = function (key, val) {
         this.data[key] = val;
+        this.next(this.data);
+    }
+    State.prototype.setHSL = function (key, val) {
+        this.data.hsl[key] = val;
         this.next(this.data);
     }
     State.prototype.next = function (val) {

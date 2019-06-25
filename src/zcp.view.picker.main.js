@@ -1,3 +1,5 @@
+import { rgbToHsl } from "./zcp.utils";
+
 const PickerMainCtrl = (function () {
     const colorLoc = {
         x: 0,
@@ -6,7 +8,7 @@ const PickerMainCtrl = (function () {
     function renderPickerMarker(x, y) {
         this.ctx.save();
         this.ctx.beginPath();
-        this.ctx.strokeStyle = y > this.h/2 ? 'white' : 'black';
+        this.ctx.strokeStyle = y > this.h / 2 ? 'white' : 'black';
         this.ctx.lineWidth = 1.25;
         this.ctx.arc(x, y, 10, 0, 2 * Math.PI);
         this.ctx.stroke();
@@ -21,7 +23,7 @@ const PickerMainCtrl = (function () {
         colorLoc.y = 0;
         this.ctx.canvas.addEventListener('click', this.onClick.bind(this));
         this.state.subscribe(data => {
-            this.render(data.currentColor);
+            this.render(`hsl(${data.hsl.h}, 100%, 50%)`);
         });
     }
     PickerMainCtrl.prototype.render = function (color) {
@@ -45,8 +47,9 @@ const PickerMainCtrl = (function () {
     PickerMainCtrl.prototype.onClick = function (e) {
         colorLoc.x = e.offsetX;
         colorLoc.y = e.offsetY;
-        let [r,g,b,a] = [...this.ctx.getImageData(colorLoc.x, colorLoc.y, 1, 1).data];
-        this.state.set('newColor', `rgb(${r},${g},${b})`);
+        let [r, g, b] = [...this.ctx.getImageData(colorLoc.x, colorLoc.y, 1, 1).data];
+        let [h, s, l] = rgbToHsl(r, g, b);
+        this.state.set('hsl', { h, s, l });
     }
     return PickerMainCtrl;
 })();
