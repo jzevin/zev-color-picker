@@ -21,21 +21,21 @@ const html = `
     <div class="inputs">
       <div class="group">
         <label for="hue">H:</label>
-        <input type="text" name="hue">
+        <input class="input input-hue" type="number" name="hue" min="0" max="9999" step="1">
       </div>
       <div class="group">
         <label for="saturation">S:</label>
-        <input type="text" name="saturation">
+        <input class="input input-saturation" type="number" name="saturation" min="0" max="100" step="1">
       </div>
       <div class="group">
-        <label for="brightness">B:</label>
-        <input type="text" name="brightness">
+        <label for="lightness">B:</label>
+        <input class="input input-lightness" type="number" name="lightness" min="0" max="100" step="1">
       </div>
     </div>
   </div>
   <div class="buttons">
-    <button class="btn">OK</button>
-    <button class="btn">Cancel</button>
+    <button class="btn btn-ok">OK</button>
+    <button class="btn btn-cancel">cancel</button>
   </div>
 </div>
 `;

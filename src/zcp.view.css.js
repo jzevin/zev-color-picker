@@ -61,7 +61,7 @@ const css = `
   .zev-color-picker .properties .chips .chip {
     width: 60px;
     height: 45px;
-    background-color: #000;
+    background-color: #222;
     border-radius: 4px;
     margin-bottom: 0.25em;
   }
@@ -75,7 +75,7 @@ const css = `
     margin-bottom: 0.5em;
   }
   .zev-color-picker .properties .inputs .group input {
-    width: 3.25em;
+    width: 4.25em;
     text-align: center;
     background: transparent;
     border: 1px solid #ddd;
