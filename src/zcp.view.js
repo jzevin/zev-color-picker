@@ -1,5 +1,6 @@
 import { html } from './zcp.view.html';
 import { css } from './zcp.view.css';
+import { PickerMainCtrl } from './zcp.view.picker.main';
 
 const ViewCtrl = (function () {
     function mount() {
@@ -31,9 +32,10 @@ const ViewCtrl = (function () {
             cancel: $('.btn-cancel')
         };
     }
-    function ViewCtrl() {
+    function ViewCtrl(state) {
         mount.apply(this);
         setDomRefs.apply(this);
+        const pMain = new PickerMainCtrl(this.dom.pickers.main, state);
     }
     return ViewCtrl;
 })();

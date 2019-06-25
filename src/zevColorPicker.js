@@ -1,11 +1,17 @@
-import { ViewCtrl } from './zcp.view';
+import { ViewCtrl } from './zcp.view'
+import { ZcpState } from './zcp.state';
 
-const ZevColorPicker = (function (view) {
+const ZevColorPicker = (function () {
     function ZevColorPicker() {
-        this.view = view;
+        this.state = new ZcpState();
+        this.view = new ViewCtrl(this.state);
+        this.state.subscribe(data => {
+            console.log(data);
+            this.view.dom.chips.new.style.backgroundColor = data.newColor;
+        });
     }
     return ZevColorPicker;
-})(new ViewCtrl());
+})();
 
 
 export default ZevColorPicker;

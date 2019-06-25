@@ -28,7 +28,7 @@ const html = `
         <input class="input input-saturation" type="number" name="saturation" min="0" max="100" step="1">
       </div>
       <div class="group">
-        <label for="lightness">B:</label>
+        <label for="lightness">L:</label>
         <input class="input input-lightness" type="number" name="lightness" min="0" max="100" step="1">
       </div>
     </div>

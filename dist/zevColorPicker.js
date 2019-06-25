@@ -34,7 +34,7 @@
         <input class="input input-saturation" type="number" name="saturation" min="0" max="100" step="1">
       </div>
       <div class="group">
-        <label for="lightness">B:</label>
+        <label for="lightness">L:</label>
         <input class="input input-lightness" type="number" name="lightness" min="0" max="100" step="1">
       </div>
     </div>
@@ -152,6 +152,59 @@
    
 `;
 
+  const PickerMainCtrl = (function () {
+      const colorLoc = {
+          x: 0,
+          y: 0
+      };
+      function renderPickerMarker(x, y) {
+          this.ctx.save();
+          this.ctx.beginPath();
+          this.ctx.strokeStyle = y > this.h/2 ? 'white' : 'black';
+          this.ctx.lineWidth = 1.25;
+          this.ctx.arc(x, y, 10, 0, 2 * Math.PI);
+          this.ctx.stroke();
+          this.ctx.restore();
+      }
+      function PickerMainCtrl(canvas, state) {
+          this.ctx = canvas.getContext('2d');
+          this.state = state;
+          this.w = canvas.width;
+          this.h = canvas.height;
+          colorLoc.x = this.w;
+          colorLoc.y = 0;
+          this.ctx.canvas.addEventListener('click', this.onClick.bind(this));
+          this.state.subscribe(data => {
+              this.render(data.currentColor);
+          });
+      }
+      PickerMainCtrl.prototype.render = function (color) {
+          const grad1 = this.ctx.createLinearGradient(0, 0, this.w, 0);
+          grad1.addColorStop(0, 'white');
+          grad1.addColorStop(1, color);
+          const grad2 = this.ctx.createLinearGradient(0, 0, 0, this.h);
+          grad2.addColorStop(0, 'white');
+          grad2.addColorStop(1, 'black');
+          this.ctx.save();
+          this.ctx.fillStyle = grad1;
+          this.ctx.fillRect(0, 0, this.w, this.h);
+          this.ctx.restore();
+          this.ctx.save();
+          this.ctx.fillStyle = grad2;
+          this.ctx.globalCompositeOperation = 'multiply';
+          this.ctx.fillRect(0, 0, this.w, this.h);
+          this.ctx.restore();
+          renderPickerMarker.apply(this, [colorLoc.x, colorLoc.y]);
+      };
+      PickerMainCtrl.prototype.onClick = function (e) {
+          colorLoc.x = e.offsetX;
+          colorLoc.y = e.offsetY;
+          let [r,g,b,a] = [...this.ctx.getImageData(colorLoc.x, colorLoc.y, 1, 1).data];
+          this.state.set('newColor', `rgb(${r},${g},${b})`);
+      };
+      return PickerMainCtrl;
+  })();
+
   const ViewCtrl = (function () {
       function mount() {
           this.dom = {
@@ -182,19 +235,47 @@
               cancel: $('.btn-cancel')
           };
       }
-      function ViewCtrl() {
+      function ViewCtrl(state) {
           mount.apply(this);
           setDomRefs.apply(this);
+          const pMain = new PickerMainCtrl(this.dom.pickers.main, state);
       }
       return ViewCtrl;
   })();
 
-  const ZevColorPicker = (function (view) {
+  const ZcpState = (function () {
+      const observers = [];
+      function State() {
+          this.data = {
+              currentColor: 'purple',
+              newColor: 'purple'
+          };
+      }
+      State.prototype.subscribe = function (cb) {
+          observers.push(cb);
+          cb(this.data);
+      };
+      State.prototype.set = function (key, val) {
+          this.data[key] = val;
+          this.next(this.data);
+      };
+      State.prototype.next = function (val) {
+          observers.forEach( o => o(val) );
+      };
+      return State;
+  })();
+
+  const ZevColorPicker = (function () {
       function ZevColorPicker() {
-          this.view = view;
+          this.state = new ZcpState();
+          this.view = new ViewCtrl(this.state);
+          this.state.subscribe(data => {
+              console.log(data);
+              this.view.dom.chips.new.style.backgroundColor = data.newColor;
+          });
       }
       return ZevColorPicker;
-  })(new ViewCtrl());
+  })();
 
   return ZevColorPicker;
 
